@@ -18,12 +18,12 @@ class NfcHelper {
         val nfcAdapter = NfcAdapter.getDefaultAdapter(fragmentActivity)
         val techLists = arrayOf(arrayOf(Ndef::class.java.name))
         val pendingIntent = PendingIntent.getActivity(
-            fragmentActivity, REQUEST_CODE_NFC,
+            fragmentActivity, 0,
             Intent(fragmentActivity, fragmentActivity.javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
             0
         )
 
-        val intentFilter = IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED)
+        val intentFilter = IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED)
 
         try {
             intentFilter.addDataType(MIME_TYPE_NFC)
@@ -43,10 +43,10 @@ class NfcHelper {
                 )
             }
 
-            /*@OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+            @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
             fun onPause() {
                 nfcAdapter.disableForegroundDispatch(fragmentActivity)
-            }*/
+            }
 
             @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
             fun onDestroy() {
@@ -56,9 +56,7 @@ class NfcHelper {
     }
 
     fun handleIntent(intent: Intent) {
-        if (intent.action == NfcAdapter.ACTION_TAG_DISCOVERED
-            && intent.type == MIME_TYPE_NFC) {
-
+        if (intent.action == NfcAdapter.ACTION_TECH_DISCOVERED) {
             val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
             uid.value = byteArrayToHexString(tag.id)
         }
@@ -79,7 +77,6 @@ class NfcHelper {
     }.toString()
 
     companion object {
-        const val REQUEST_CODE_NFC = 111
         const val MIME_TYPE_NFC = "application/com.roonyx.nfcreader.nfc"
     }
 }
