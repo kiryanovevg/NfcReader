@@ -6,6 +6,8 @@ import android.content.IntentFilter
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.Ndef
+import android.provider.Settings
+import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.*
 
@@ -38,9 +40,13 @@ class NfcHelper {
 
             @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
             fun onResume() {
-                nfcAdapter.enableForegroundDispatch(
-                    fragmentActivity, pendingIntent, filters, techLists
-                )
+                if (!nfcAdapter.isEnabled) {
+                    fragmentActivity.startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
+                } else {
+                    nfcAdapter.enableForegroundDispatch(
+                        fragmentActivity, pendingIntent, filters, techLists
+                    )
+                }
             }
 
             @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -58,7 +64,9 @@ class NfcHelper {
     fun handleIntent(intent: Intent) {
         if (intent.action == NfcAdapter.ACTION_TECH_DISCOVERED) {
             val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
-            uid.value = byteArrayToHexString(tag.id)
+            val uidStr = byteArrayToHexString(tag.id)
+            uid.value = uidStr
+            Log.d(TAG, uidStr)
         }
     }
 
@@ -78,5 +86,6 @@ class NfcHelper {
 
     companion object {
         const val MIME_TYPE_NFC = "application/com.roonyx.nfcreader.nfc"
+        private val TAG = this::class.java.simpleName
     }
 }
