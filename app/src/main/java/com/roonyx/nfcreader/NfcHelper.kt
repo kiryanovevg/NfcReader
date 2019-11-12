@@ -40,12 +40,12 @@ class NfcHelper {
 
             @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
             fun onResume() {
-                if (!nfcAdapter.isEnabled) {
-                    fragmentActivity.startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
-                } else {
+                if (nfcAdapter.isEnabled) {
                     nfcAdapter.enableForegroundDispatch(
                         fragmentActivity, pendingIntent, filters, techLists
                     )
+                } else {
+                    fragmentActivity.startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
                 }
             }
 
