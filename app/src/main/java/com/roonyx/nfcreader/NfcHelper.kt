@@ -10,6 +10,7 @@ import android.provider.Settings
 import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.*
+import kotlinx.android.synthetic.main.activity_main.*
 
 class NfcHelper {
 
@@ -17,7 +18,7 @@ class NfcHelper {
     val uidLiveData: LiveData<String> get() = uid
 
     fun initialize(fragmentActivity: FragmentActivity) {
-        val nfcAdapter = NfcAdapter.getDefaultAdapter(fragmentActivity)
+        val nfcAdapter: NfcAdapter? = NfcAdapter.getDefaultAdapter(fragmentActivity)
         val techLists = arrayOf(arrayOf(Ndef::class.java.name))
         val pendingIntent = PendingIntent.getActivity(
             fragmentActivity, 0,
@@ -40,18 +41,22 @@ class NfcHelper {
 
             @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
             fun onResume() {
-                if (nfcAdapter.isEnabled) {
-                    nfcAdapter.enableForegroundDispatch(
-                        fragmentActivity, pendingIntent, filters, techLists
-                    )
+                if (nfcAdapter != null) {
+                    if (nfcAdapter.isEnabled) {
+                        nfcAdapter.enableForegroundDispatch(
+                            fragmentActivity, pendingIntent, filters, techLists
+                        )
+                    } else {
+                        fragmentActivity.startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
+                    }
                 } else {
-                    fragmentActivity.startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
+                    fragmentActivity.textView.text = "No hardware"
                 }
             }
 
             @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
             fun onPause() {
-                nfcAdapter.disableForegroundDispatch(fragmentActivity)
+                nfcAdapter?.disableForegroundDispatch(fragmentActivity)
             }
 
             @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
